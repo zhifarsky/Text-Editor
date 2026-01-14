@@ -36,11 +36,11 @@ void* platform_debug_Realloc(void* oldMem, s64 oldSize, s64 newSize);
 void platform_debug_Free(void* memory);
 
 void* MemReserve(s64 size);
-void MemCommit(void *memory, s64 size); 
+void MemCommit(void* memory, s64 size);
 
 //
 // Editor services
 //
 
 void EditorUpdate(event_queue* eventQueue, program_input* input);
-void EditorRender(event_queue* eventQueue);
+void EditorRender(program_input* input);

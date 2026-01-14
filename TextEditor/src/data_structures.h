@@ -124,7 +124,8 @@ void ArenaRelease(memory_arena* arena) {
 
 #define ArenaPush(arena, size) _ArenaPush(arena, size, DEFAULT_ALIGNMENT, true)
 #define ArenaPushStruct(arena, type) _ArenaPush(arena, sizeof(type), alignof(type), true)
-#define ArenaPushArray(arena, count, type) _ArenaPush(arena, sizeof(type) * (count), alignof(type), true)
+#define ArenaPushZeroArray(arena, count, type) _ArenaPush(arena, sizeof(type) * (count), alignof(type), true)
+#define ArenaPushArray(arena, count, type) _ArenaPush(arena, sizeof(type) * (count), alignof(type), false)
 void* _ArenaPush(memory_arena* arena, s64 size, s64 alignment, bool clearToZero) {
 	u8* result = arena->base + arena->size;
 	s64 padding = -(s64)result & (alignment - 1); // работает только со степенями двойки
@@ -135,7 +136,7 @@ void* _ArenaPush(memory_arena* arena, s64 size, s64 alignment, bool clearToZero)
 	
 	// commit memory
 	if (result + size >= arena->base + arena->commited) {
-		s64 commitSize = RoundToMultiple(size, COMMIT_SIZE);
+		s64 commitSize = RoundToMultiple(size + padding, COMMIT_SIZE);
 		te_assert(arena->reserved >= arena->commited + commitSize);
 		
 		MemCommit(arena->base + arena->commited, commitSize);
@@ -331,10 +332,30 @@ void Push(array_dynamic<T>* array, memory_arena* arena, const T& item) {
 	if (newCount > array->maxCount) {
 		s64 newMaxCount = newCount * GROWTH_FACTOR;
 		array->items = (T*)ArenaReallocArray(arena, array->items, array->count, newMaxCount, T);
-		array->count = newMaxCount;
+		array->maxCount = newMaxCount;
 	}
 	
-	array->items[array->count++] = item;
+	array->items[array->count] = item;
+	array->count = newCount;
+}
+
+template <typename T>
+void Insert(array_dynamic<T>* array, memory_arena* arena, const T& item, s64 index) {
+	if (index > array->count)
+		return;
+	
+	s64 newCount = array->count + 1;
+	if (newCount > array->maxCount) {
+		s64 newMaxCount = newCount * GROWTH_FACTOR;
+		array->items = (T*)ArenaReallocArray(arena, array->items, array->count, newMaxCount, T);
+		array->count = newMaxCount;
+	}
+		
+	for (s64 i = array->count; i > index; i--) {
+		array->items[i] = array->items[i - 1]; 
+	}
+	array->items[index] = item;
+	array->count = newCount;
 }
 
 template <typename T>

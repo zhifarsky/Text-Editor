@@ -3,75 +3,74 @@
 #include "data_structures.h"
 
 namespace ImGui {
-	void GetWindowRegion(ImVec2* min, ImVec2* max) {
-		*min = ImGui::GetWindowContentRegionMin();
-		*max = ImGui::GetWindowContentRegionMax();
+void GetWindowRegion(ImVec2* min, ImVec2* max) {
+	*min = ImGui::GetWindowContentRegionMin();
+	*max = ImGui::GetWindowContentRegionMax();
 
-		min->x += ImGui::GetWindowPos().x;
-		min->y += ImGui::GetWindowPos().y;
-		max->x += ImGui::GetWindowPos().x;
-		max->y += ImGui::GetWindowPos().y;
-	}
-	
-	void Text(string str) {
-		ImGui::TextUnformatted(StrFirst(str), StrLast(str) + 1);
-	}
-	
-	bool Button(string label, const ImVec2 &size = ImVec2(0,0) ) {
-		char buf[1024];
-		te_assert(sizeof(buf) > label.size);
-		ToCString(buf, sizeof(buf), &label);
-		
-		return ImGui::Button(buf, size);
-	}
-	
-	void Arena(memory_arena* arena, const char* name) {
-		f32 divider = Kilobytes(1);
-		ImGui::Text("%s: size/comm/res %.2fKB/%.2fKB/%.2fKB",
-			name,
-			arena->size / divider, arena->commited / divider, arena->reserved / divider);
-	}
-	
-	void DrawCursor(int cursorIndex, string text, ImU32 color = IM_COL32_WHITE) {
-		int lineBreakCount = 0; // количество строк перед курсором
-		int lineStart = 0; // индекс, с которого начинается строка
-		int lineLen = 0; // длина строки
-		
-		// находим количество строк перед курсором, начало последней строки и длину этой строки
-		for (s64 i = 0; i < cursorIndex && i < text.size; i++)
-		{
-			lineLen++;
-			if (text[i] == '\n') {
-				lineBreakCount++;
-				lineLen = 0;
-			}
-			if (i > 0 && text[i-1] == '\n') {
-				lineStart = i;
-			}
-		}
-		
-		// находим размер строки до курсора в пикселях, чтобы отрисовать курсор в нужном месте
-		ImVec2 lineSize = ImGui::CalcTextSize(&text[lineStart], &text[lineStart] + lineLen);
-
-		ImVec2 vMin, vMax;
-		GetWindowRegion(&vMin, &vMax);
-
-		ImVec2 cursorPos1(lineSize.x + vMin.x, lineBreakCount * lineSize.y + vMin.y);
-		ImVec2 cursorPos2(cursorPos1);
-		cursorPos2.y += lineSize.y;
-
-		ImDrawList* drawList = ImGui::GetWindowDrawList();
-		drawList->AddLine(cursorPos1, cursorPos2, color, 1.0f);
-	}
+	min->x += ImGui::GetWindowPos().x;
+	min->y += ImGui::GetWindowPos().y;
+	max->x += ImGui::GetWindowPos().x;
+	max->y += ImGui::GetWindowPos().y;
 }
 
+void Text(string str) {
+	ImGui::TextUnformatted(StrFirst(str), StrLast(str) + 1);
+}
+
+bool Button(string label, const ImVec2& size = ImVec2(0, 0)) {
+	char buf[1024];
+	te_assert(sizeof(buf) > label.size);
+	ToCString(buf, sizeof(buf), &label);
+
+	return ImGui::Button(buf, size);
+}
+
+void Arena(memory_arena* arena, const char* name) {
+	f32 divider = Kilobytes(1);
+	ImGui::Text("%s: size/comm/res %.2fKB/%.2fKB/%.2fKB",
+							name,
+							arena->size / divider, arena->commited / divider, arena->reserved / divider);
+}
+
+void DrawCursor(int cursorIndex, string text, ImU32 color = IM_COL32_WHITE) {
+	int lineBreakCount = 0;	 // количество строк перед курсором
+	int lineStart = 0;			 // индекс, с которого начинается строка
+	int lineLen = 0;				 // длина строки
+
+	// находим количество строк перед курсором, начало последней строки и длину этой строки
+	for (s64 i = 0; i < cursorIndex && i < text.size; i++) {
+		lineLen++;
+		if (text[i] == '\n') {
+			lineBreakCount++;
+			lineLen = 0;
+		}
+		if (i > 0 && text[i - 1] == '\n') {
+			lineStart = i;
+		}
+	}
+
+	// находим размер строки до курсора в пикселях, чтобы отрисовать курсор в нужном месте
+	ImVec2 lineSize = ImGui::CalcTextSize(&text[lineStart], &text[lineStart] + lineLen);
+
+	ImVec2 vMin, vMax;
+	GetWindowRegion(&vMin, &vMax);
+
+	ImVec2 cursorPos1(lineSize.x + vMin.x, lineBreakCount * lineSize.y + vMin.y);
+	ImVec2 cursorPos2(cursorPos1);
+	cursorPos2.y += lineSize.y;
+
+	ImDrawList* drawList = ImGui::GetWindowDrawList();
+	drawList->AddLine(cursorPos1, cursorPos2, color, 1.0f);
+}
+}	 // namespace ImGui
+
 void SetDarkTheme() {
-	ImGuiStyle &style = ImGui::GetStyle();
-	ImVec4 *colors = style.Colors;
+	ImGuiStyle& style = ImGui::GetStyle();
+	ImVec4* colors = style.Colors;
 
 	// Primary background
-	colors[ImGuiCol_WindowBg] = ImVec4(0.07f, 0.07f, 0.09f, 1.00f);  // #131318
-	colors[ImGuiCol_MenuBarBg] = ImVec4(0.12f, 0.12f, 0.15f, 1.00f); // #131318
+	colors[ImGuiCol_WindowBg] = ImVec4(0.07f, 0.07f, 0.09f, 1.00f);		// #131318
+	colors[ImGuiCol_MenuBarBg] = ImVec4(0.12f, 0.12f, 0.15f, 1.00f);	// #131318
 
 	colors[ImGuiCol_PopupBg] = ImVec4(0.18f, 0.18f, 0.22f, 1.00f);
 
