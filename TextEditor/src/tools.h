@@ -23,15 +23,6 @@ void MemCopy(void* destination, const void* source, s64 size) {
 	}
 }
 
-#define ZeroStruct(dest) MemZero(&dest, sizeof(dest))
-void MemZero(void* destination, s64 size) {
-	u8* dest = (u8*)destination;
-
-	while (size--) {
-		*dest++ = 0;
-	}
-}
-
 void MemSet(void* destination, u8 value, s64 count) {
 	u8* dest = (u8*)destination;
 
@@ -101,8 +92,8 @@ bool StrFind(const char* strA, const char* strB, str_find_flags flags = 0) {
 	return count;
 }
 
-#define te_Min(a, b) (a < b ? a : b)
-#define te_Max(a, b) (a > b ? a : b)
+#define te_Min(a, b) ((a) < (b) ? (a) : (b))
+#define te_Max(a, b) ((a) > (b) ? (a) : (b))
 
 s64 Abs(s64 value) {
 	if (value < 0)

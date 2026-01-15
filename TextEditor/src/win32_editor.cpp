@@ -1,9 +1,10 @@
+#include <vlib/vlib.h>
+
 // internal headers
 #include "editor.h"
 #include "data_structures.h"
 #include "input.h"
 
-// modules
 #include "editor.cpp"	 // NOTE: в идеале должен компилироваться отдельно, т.к. отдельный модуль
 
 // external headers
@@ -309,8 +310,12 @@ int WinMain(
 // s32 __stdcall WinMainCRTStartup() {
 // #endif
 void main() {
+	ThreadContextInit();
+
 	s32 result = WinMain(GetModuleHandle(0), 0, 0, 0);
 	ExitProcess(result);
+
+	// ThreadContextRelease();
 }
 
 //
@@ -412,3 +417,5 @@ LRESULT CALLBACK WindowProc(HWND window, UINT msg, WPARAM wParam, LPARAM lParam)
 	return DefWindowProcW(window, msg, wParam, lParam);
 	;
 }
+
+#include <vlib/vlib.cpp>

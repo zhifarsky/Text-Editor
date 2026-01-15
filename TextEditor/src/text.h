@@ -24,10 +24,10 @@ enum encoding_type {
 // undo/redo stacks
 
 struct text_tab {
-	memory_arena arena;
+	Arena* arena;
 
-	array_dynamic<char> added;
-	array_dynamic<text_node> nodes;
+	Array<char> added;
+	Array<text_node> nodes;
 	char* original;
 
 	s64 cursorIndex;
@@ -46,14 +46,14 @@ text_tab TextTab(s32 id) {
 
 	newTab.arena = ArenaAlloc(Megabytes(1));
 
-	newTab.added = Array<char>(&newTab.arena);
-	newTab.nodes = Array<text_node>(&newTab.arena);
+	newTab.added = {};
+	newTab.nodes = {};
 
 	return newTab;
 }
 
 void Release(text_tab* tab) {
-	ArenaRelease(&tab->arena);
+	ArenaRelease(tab->arena);
 }
 
 // TODO: заглушки, реализовать
@@ -70,11 +70,11 @@ void TextInsertNode(text_tab* textTab, const text_node& newNode, s64 index) {
 	if (newNode.length <= 0)
 		return;
 
-	array_dynamic<text_node>& nodes = textTab->nodes;
+	Array<text_node>& nodes = textTab->nodes;
 
 	// вставка в начало
 	if (index == 0) {
-		Insert(&nodes, &textTab->arena, newNode, 0);
+		ArrayInsert(textTab->arena, &nodes, newNode, 0);
 		return;
 	}
 
@@ -92,7 +92,7 @@ void TextInsertNode(text_tab* textTab, const text_node& newNode, s64 index) {
 					curNode->start + curNode->length == newNode.start) {
 				curNode->length += newNode.length;
 			} else {
-				Insert(&nodes, &textTab->arena, newNode, i + 1);
+				ArrayInsert(textTab->arena, &nodes, newNode, i + 1);
 			}
 			break;
 		}
@@ -112,20 +112,20 @@ void TextInsertNode(text_tab* textTab, const text_node& newNode, s64 index) {
 			te_assert(node1.length > 0 && node2.length > 0);
 
 			*curNode = node1;
-			Insert(&nodes, &textTab->arena, node2, i + 1);
-			Insert(&nodes, &textTab->arena, newNode, i + 1);
+			ArrayInsert(textTab->arena, &nodes,  node2, i + 1);
+			ArrayInsert(textTab->arena, &nodes, newNode, i + 1);
 			break;
 		}
 	}
 }
 
-void TextInsertString(text_tab* tab, string str, s64 index) {
-	text_node newNode = {.start = tab->added.count, .length = str.size, .type = Node_Added};
+void TextInsertString(text_tab* tab, String str, s64 index) {
+	text_node newNode = {.start = tab->added.count, .length = str.length, .type = Node_Added};
 	te_assert(newNode.length > 0);
 
 	// TODO: добавить в Array append сразу нескольких элементов
-	for (s64 i = 0; i < str.size; i++) {
-		Push(&tab->added, &tab->arena, str.base[i]);
+	for (s64 i = 0; i < str.length; i++) {
+		ArrayPush(tab->arena, &tab->added, str.base[i]);
 	}
 
 	TextInsertNode(tab, newNode, index);
@@ -138,7 +138,7 @@ void TextInsertChar(text_tab* textTab, code_point utf8CodePoint, s64 pos) {
 		bytes[j] = utf8CodePoint.bytes[i];
 	}
 
-	string str = String((char*)bytes, length);
+	String str = Str((char*)bytes, length);
 	TextInsertString(textTab, str, pos);
 }
 
@@ -159,7 +159,7 @@ s64 TextGetLength(text_tab* tab) {
 // возвращает кол-во записанных символов
 // не выставляет null-terminator
 s64 TextBuild(text_tab* tab, char* buf) {
-	array_dynamic<text_node>& nodes = tab->nodes;
+	Array<text_node>& nodes = tab->nodes;
 
 	char* bufSlider = buf;
 	for (size_t i = 0; i < nodes.count; i++) {

@@ -13,32 +13,32 @@ void GetWindowRegion(ImVec2* min, ImVec2* max) {
 	max->y += ImGui::GetWindowPos().y;
 }
 
-void Text(string str) {
+void Text(String str) {
 	ImGui::TextUnformatted(StrFirst(str), StrLast(str) + 1);
 }
 
-bool Button(string label, const ImVec2& size = ImVec2(0, 0)) {
+bool Button(String label, const ImVec2& size = ImVec2(0, 0)) {
 	char buf[1024];
-	te_assert(sizeof(buf) > label.size);
-	ToCString(buf, sizeof(buf), &label);
+	te_assert(sizeof(buf) > label.length);
+	StrToCstr(label, buf, sizeof(buf));
 
 	return ImGui::Button(buf, size);
 }
 
-void Arena(memory_arena* arena, const char* name) {
+void ArenaWidget(Arena* arena, const char* name) {
 	f32 divider = Kilobytes(1);
 	ImGui::Text("%s: size/comm/res %.2fKB/%.2fKB/%.2fKB",
 							name,
-							arena->size / divider, arena->commited / divider, arena->reserved / divider);
+							arena->used / divider, arena->commited / divider, arena->reserved / divider);
 }
 
-void DrawCursor(int cursorIndex, string text, ImU32 color = IM_COL32_WHITE) {
+void DrawCursor(int cursorIndex, String text, ImU32 color = IM_COL32_WHITE) {
 	int lineBreakCount = 0;	 // количество строк перед курсором
 	int lineStart = 0;			 // индекс, с которого начинается строка
 	int lineLen = 0;				 // длина строки
 
 	// находим количество строк перед курсором, начало последней строки и длину этой строки
-	for (s64 i = 0; i < cursorIndex && i < text.size; i++) {
+	for (s64 i = 0; i < cursorIndex && i < text.length; i++) {
 		lineLen++;
 		if (text[i] == '\n') {
 			lineBreakCount++;

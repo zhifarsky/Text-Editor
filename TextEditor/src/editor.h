@@ -1,23 +1,11 @@
 #pragma once
 #include <stdint.h>
 
-#define Kilobytes(n) (n * 1024LL)
-#define Megabytes(n) (Kilobytes(n) * 1024LL)
-#define Gigabytes(n) (Megabytes(n) * 1024LL)
-
-#define ArrayCount(array) (sizeof(array) / sizeof(*(array)))
-
 typedef int8_t s8;
-typedef uint8_t u8;
 typedef int16_t s16;
-typedef uint16_t u16;
 typedef int32_t s32;
-typedef uint32_t u32;
 typedef int64_t s64;
-typedef uint64_t u64;
 
-typedef float f32;
-typedef double f64;
 
 #include "data_structures.h"
 

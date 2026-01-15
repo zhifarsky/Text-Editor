@@ -2,6 +2,8 @@
 #include <imgui/imgui_impl_opengl3.h>
 #include <imgui/imgui_internal.h>
 
+#include <vlib/vlib.h>
+
 #include "data_structures.h"
 #include "editor.h"
 #include "localization.h"
@@ -34,10 +36,10 @@ void OpenCommandPalette() {
 //
 
 struct editor_state {
-	memory_arena arena;
-	memory_arena frameArena;
+	Arena* arena;
+	Arena* frameArena;
 
-	array_dynamic<text_tab> tabs;	 // TODO: указатели next в text_tab для freeList
+	Array<text_tab> tabs;	 // TODO: указатели next в text_tab для freeList
 	u32 tabIDCounter;
 
 	u32 fontSize;
@@ -76,13 +78,13 @@ void AddTextTab(editor_state* editor) {
 
 	text_tab newTab = TextTab(editor->tabIDCounter++);
 	editor->currentTextTabID = newTab.id;
-	Push<text_tab>(&editor->tabs, &editor->arena, newTab);
+	ArrayPush<text_tab>(editor->arena, &editor->tabs, newTab);
 }
 
 void CloseTextTab(editor_state* editor, u32 tabIndex) {
 	text_tab* tab = &editor->tabs[tabIndex];
-	ArenaRelease(&tab->arena);
-	RemoveFast<text_tab>(&editor->tabs, tabIndex);
+	ArenaRelease(tab->arena);
+	ArrayRemoveFast<text_tab>(&editor->tabs, tabIndex);
 }
 
 void ExecuteCommand(command_type commandType, editor_state* editorState) {
@@ -137,7 +139,7 @@ void EditorUpdate(event_queue* eventQueue, program_input* input) {
 		editorState->frameArena = ArenaAlloc(Megabytes(64), Gigabytes(64));
 
 		editorState->currentTextTabID = -1;
-		editorState->tabs = Array<text_tab>(&editorState->arena, 128);
+		editorState->tabs = {};
 
 		//
 		// Init Fonts & Theme
@@ -157,7 +159,7 @@ void EditorUpdate(event_queue* eventQueue, program_input* input) {
 		editorState->isInitialized = true;
 	}
 
-	memory_arena* frameArena = &editorState->frameArena;
+	Arena* frameArena = editorState->frameArena;
 
 	//
 	// Process Event Queue
@@ -232,7 +234,7 @@ void EditorRender(program_input* input) {
 	// Frame Setup
 	//
 
-	memory_arena* frameArena = &editorState->frameArena;
+	Arena* frameArena = editorState->frameArena;
 
 	platform_StartFrame();
 
@@ -341,12 +343,18 @@ void EditorRender(program_input* input) {
 	for (size_t i = 0; i < editorState->tabs.count; i++) {
 		text_tab* tab = &editorState->tabs[i];
 
-		string_builder builder = {0};
-		StrAppend(frameArena, &builder, "New ");
-		IntAppend(frameArena, &builder, tab->id);
-		char label[256];
-		ToCString(label, 256, &builder);
-
+		StrBuilder builder = {0};
+		
+		// TODO: реализовать форматированные строки и заменить
+		
+		
+		// StrAppend(frameArena, &builder, "New ");
+		// IntAppend(frameArena, &builder, tab->id); 
+		// char label[256];
+		// StrToCstr(builder.buffer, label, sizeof(label));
+		
+		const char* label = StrToCstr(frameArena, StrBuildF(frameArena, "%s %d", "New", tab->id));
+		
 		if (ImGui::Begin(label, &tab->isOpen, ImGuiWindowFlags_NoSavedSettings)) {
 			if (ImGui::IsWindowFocused()) {
 				editorState->currentTextTabID = tab->id;
@@ -365,14 +373,14 @@ void EditorRender(program_input* input) {
 				}
 			}
 
-			string filenameStub = String("filename_stub.txt");
+			String filenameStub = Str("filename_stub.txt");
 			ImGui::Text(filenameStub);
 
 			// TODO: билдится каждый кадр, улучшить
 			s64 length = TextGetLength(tab);
 			char* buf = (char*)ArenaPushArray(frameArena, length, char);
 			s64 bytesWritten = TextBuild(tab, buf);
-			string text = String(buf, bytesWritten);
+			String text = Str(buf, bytesWritten);
 
 			if (ImGui::BeginChild("TextChild", ImVec2(0, 0), 1)) {
 				ImGui::Text(text);
@@ -450,7 +458,7 @@ void EditorRender(program_input* input) {
 					break;
 				}
 
-				string_builder sb = {0};
+				StrBuilder sb = {0};
 
 				// hotkey string
 				{
@@ -497,8 +505,8 @@ void EditorRender(program_input* input) {
 	// test
 	if (ImGui::Begin("Debug")) {
 		f32 divider = Kilobytes(1);
-		ImGui::Arena(&editorState->arena, "Main Arena");
-		ImGui::Arena(&editorState->frameArena, "Frame Arena");
+		ImGui::ArenaWidget(editorState->arena, "Main Arena");
+		ImGui::ArenaWidget(editorState->frameArena, "Frame Arena");
 	}
 	ImGui::End();
 
