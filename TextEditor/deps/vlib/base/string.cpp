@@ -1,7 +1,9 @@
-#include "string.h"
 #include <stdio.h>
 #include <string.h>
 #include <stdarg.h>
+#include <stdlib.h>
+
+#include "string.h"
 
 #define STR_FORMAT_LIMIT 1024
 
@@ -92,7 +94,8 @@ const char* StrFirst(String str) {
 	return &str[0];
 }
 const char* StrLast(String str) {
-	return &str[str.length - 1]; // при длине 0 индекс будет -1
+	i64 idx = min(str.length - 1, 0);
+	return &str[idx];
 }
 
 //

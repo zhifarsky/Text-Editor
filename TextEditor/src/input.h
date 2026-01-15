@@ -12,8 +12,8 @@ struct code_point {
 
 #define CodePoint(value) {.v = value}
 
-s32 GetLength(code_point p) {
-	for (s32 i = 3; i >= 0; i--) {
+i32 GetLength(code_point p) {
+	for (i32 i = 3; i >= 0; i--) {
 		u8 byte = p.bytes[i];
 		if (byte == 0)
 			continue;
@@ -90,7 +90,7 @@ enum te_Key {
 };
 
 struct button_state {
-	s32 halfTransitionsCount;
+	i32 halfTransitionsCount;
 	bool isDown;
 };
 

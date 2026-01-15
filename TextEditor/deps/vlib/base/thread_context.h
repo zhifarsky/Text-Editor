@@ -8,6 +8,6 @@ struct ThreadContext {
 	bool isInitialized;
 };
 
-void ThreadContextInit();
+void ThreadContextInit(i64 arenasCommit = ARENA_COMMIT_SIZE, i64 arenasReserve = ARENA_DEFAULT_RESERVE);
 void ThreadContextRelease();
 ThreadContext* ThreadContextGet();

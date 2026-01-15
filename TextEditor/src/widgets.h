@@ -1,6 +1,5 @@
 #pragma once
 #include <imgui/imgui.h>
-#include "data_structures.h"
 
 namespace ImGui {
 void GetWindowRegion(ImVec2* min, ImVec2* max) {
@@ -38,7 +37,7 @@ void DrawCursor(int cursorIndex, String text, ImU32 color = IM_COL32_WHITE) {
 	int lineLen = 0;				 // длина строки
 
 	// находим количество строк перед курсором, начало последней строки и длину этой строки
-	for (s64 i = 0; i < cursorIndex && i < text.length; i++) {
+	for (i64 i = 0; i < cursorIndex && i < text.length; i++) {
 		lineLen++;
 		if (text[i] == '\n') {
 			lineBreakCount++;

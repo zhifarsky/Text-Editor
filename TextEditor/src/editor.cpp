@@ -4,7 +4,6 @@
 
 #include <vlib/vlib.h>
 
-#include "data_structures.h"
 #include "editor.h"
 #include "localization.h"
 #include "text.h"
@@ -43,7 +42,7 @@ struct editor_state {
 	u32 tabIDCounter;
 
 	u32 fontSize;
-	s32 currentTextTabID;
+	i32 currentTextTabID;
 
 	bool isInitialized;
 };
@@ -344,17 +343,16 @@ void EditorRender(program_input* input) {
 		text_tab* tab = &editorState->tabs[i];
 
 		StrBuilder builder = {0};
-		
+
 		// TODO: реализовать форматированные строки и заменить
-		
-		
+
 		// StrAppend(frameArena, &builder, "New ");
-		// IntAppend(frameArena, &builder, tab->id); 
+		// IntAppend(frameArena, &builder, tab->id);
 		// char label[256];
 		// StrToCstr(builder.buffer, label, sizeof(label));
-		
+
 		const char* label = StrToCstr(frameArena, StrBuildF(frameArena, "%s %d", "New", tab->id));
-		
+
 		if (ImGui::Begin(label, &tab->isOpen, ImGuiWindowFlags_NoSavedSettings)) {
 			if (ImGui::IsWindowFocused()) {
 				editorState->currentTextTabID = tab->id;
@@ -377,9 +375,9 @@ void EditorRender(program_input* input) {
 			ImGui::Text(filenameStub);
 
 			// TODO: билдится каждый кадр, улучшить
-			s64 length = TextGetLength(tab);
+			i64 length = TextGetLength(tab);
 			char* buf = (char*)ArenaPushArray(frameArena, length, char);
-			s64 bytesWritten = TextBuild(tab, buf);
+			i64 bytesWritten = TextBuild(tab, buf);
 			String text = Str(buf, bytesWritten);
 
 			if (ImGui::BeginChild("TextChild", ImVec2(0, 0), 1)) {
@@ -401,7 +399,7 @@ void EditorRender(program_input* input) {
 		if (ImGui::Begin(GetStrings().settings, &g_isSettingsOpen)) {
 			ImGui::SliderInt(GetStrings().fontSize, (int*)&editorState->fontSize, MIN_FONT_SIZE, MAX_FONT_SIZE);
 
-			static s32 currentItem = 0;
+			static i32 currentItem = 0;
 			if (ImGui::Combo(GetStrings().language, &currentItem, g_languageStrings, ArrayCount(g_languageStrings))) {
 				SetLanguage((localization_language)currentItem);
 			}
@@ -462,7 +460,7 @@ void EditorRender(program_input* input) {
 
 				// hotkey string
 				{
-					s32 count = 0;
+					i32 count = 0;
 					if (c->ctrl) {
 						StrAppend(frameArena, &sb, GetKeyString(Key_Ctrl));
 						count++;

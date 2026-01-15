@@ -12,7 +12,7 @@
 
 #define InRange(value, min_v, max_v) (((value) >= (min_v)) && ((value) <= (max_v)))
 
-void MemCopy(void* destination, const void* source, s64 size) {
+void MemCopy(void* destination, const void* source, i64 size) {
 	if (destination && source) {
 		u8* dest = (u8*)destination;
 		u8* src = (u8*)source;
@@ -23,7 +23,7 @@ void MemCopy(void* destination, const void* source, s64 size) {
 	}
 }
 
-void MemSet(void* destination, u8 value, s64 count) {
+void MemSet(void* destination, u8 value, i64 count) {
 	u8* dest = (u8*)destination;
 
 	while (count--) {
@@ -31,7 +31,7 @@ void MemSet(void* destination, u8 value, s64 count) {
 	}
 }
 
-s64 StrLen(const char* str) {
+i64 StrLen(const char* str) {
 	const char* p = str;
 	while (*p != '\0') {
 		p++;
@@ -39,18 +39,18 @@ s64 StrLen(const char* str) {
 	return p - str;
 }
 
-s64 StrLen(const unsigned char* str) {
+i64 StrLen(const unsigned char* str) {
 	return StrLen((const char*)str);
 }
 
 bool StrEqual(const char* strA, const char* strB) {
-	s64 lenA = StrLen(strA);
-	s64 lenB = StrLen(strB);
+	i64 lenA = StrLen(strA);
+	i64 lenB = StrLen(strB);
 
 	if (lenA != lenB)
 		return false;
 
-	for (s64 i = 0; i < lenA; i++) {
+	for (i64 i = 0; i < lenA; i++) {
 		if (strA[i] != strB[i])
 			return false;
 	}
@@ -72,11 +72,11 @@ typedef int str_find_flags;
 
 // сколько символов strB входит в strA с начала строки
 bool StrFind(const char* strA, const char* strB, str_find_flags flags = 0) {
-	s64 lenA = StrLen(strA);
-	s64 lenB = StrLen(strB);
+	i64 lenA = StrLen(strA);
+	i64 lenB = StrLen(strB);
 
-	s64 count = 0;
-	for (s64 i = 0; i < lenA && i < lenB; i++) {
+	i64 count = 0;
+	for (i64 i = 0; i < lenA && i < lenB; i++) {
 		char a = strA[i];
 		char b = strB[i];
 		if (flags & StrFind_ToLower) {
@@ -95,18 +95,18 @@ bool StrFind(const char* strA, const char* strB, str_find_flags flags = 0) {
 #define te_Min(a, b) ((a) < (b) ? (a) : (b))
 #define te_Max(a, b) ((a) > (b) ? (a) : (b))
 
-s64 Abs(s64 value) {
+i64 Abs(i64 value) {
 	if (value < 0)
 		return -value;
 	return value;
 }
 
-f32 Pow(f32 x, s32 y) {
+f32 Pow(f32 x, i32 y) {
 	if (y < 0)
 		return 1.0f / Pow(x, -y);
 
 	f32 result = 1.0;
-	for (s32 i = 0; i < y; i++)
+	for (i32 i = 0; i < y; i++)
 		result *= x;
 
 	return result;

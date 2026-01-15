@@ -2,7 +2,6 @@
 
 // internal headers
 #include "editor.h"
-#include "data_structures.h"
 #include "input.h"
 
 #include "editor.cpp"	 // NOTE: в идеале должен компилироваться отдельно, т.к. отдельный модуль
@@ -115,7 +114,7 @@ void platform_EndFrame() {
 	SwapBuffers(g_DeviceContext);
 }
 
-void* platform_debug_Malloc(s64 size) {
+void* platform_debug_Malloc(i64 size) {
 	return VirtualAlloc(0, size, MEM_COMMIT | MEM_RESERVE, PAGE_READWRITE);
 }
 
@@ -124,18 +123,18 @@ void platform_debug_Free(void* mem) {
 		VirtualFree(mem, 0, MEM_RELEASE);
 }
 
-void* platform_debug_Realloc(void* oldMem, s64 oldSize, s64 newSize) {
+void* platform_debug_Realloc(void* oldMem, i64 oldSize, i64 newSize) {
 	void* newMem = platform_debug_Malloc(newSize);
 	MemCopy(newMem, oldMem, oldSize);
 	platform_debug_Free(oldMem);
 	return newMem;
 }
 
-void* MemReserve(s64 size) {
+void* MemReserve(i64 size) {
 	return VirtualAlloc(0, size, MEM_RESERVE, PAGE_READWRITE);
 }
 
-void MemCommit(void* memory, s64 size) {
+void MemCommit(void* memory, i64 size) {
 	VirtualAlloc(memory, size, MEM_COMMIT, PAGE_READWRITE);
 }
 
@@ -154,8 +153,8 @@ int WinMain(
 	wc.hInstance = Instance;
 	wc.lpszClassName = L"TextEditorWindowClass";
 
-	s32 windowWidth = 900;
-	s32 windowHeight = 600;
+	i32 windowWidth = 900;
+	i32 windowHeight = 600;
 
 	// register class and create window
 	if (RegisterClassW(&wc)) {
@@ -305,17 +304,17 @@ int WinMain(
 // Release с /subsystem:windows
 
 // #if _DEBUG
-// s32 __stdcall mainCRTStartup() {
+// i32 __stdcall mainCRTStartup() {
 // #else
-// s32 __stdcall WinMainCRTStartup() {
+// i32 __stdcall WinMainCRTStartup() {
 // #endif
 void main() {
-	ThreadContextInit();
+	VlibInit();
 
-	s32 result = WinMain(GetModuleHandle(0), 0, 0, 0);
+	i32 result = WinMain(GetModuleHandle(0), 0, 0, 0);
 	ExitProcess(result);
 
-	// ThreadContextRelease();
+	VlibDestroy();
 }
 
 //
@@ -369,12 +368,12 @@ LRESULT CALLBACK WindowProc(HWND window, UINT msg, WPARAM wParam, LPARAM lParam)
 			if (iswprint(wideChar))	 // CRT. TODO: можно ли убрать?
 			{
 				char utf8Buffer[5] = {0};
-				s32 bytesWritten =
+				i32 bytesWritten =
 						WideCharToMultiByte(CP_UTF8, 0, &wideChar, 1, utf8Buffer, sizeof(utf8Buffer), NULL, NULL);
 
 				// to little endian
 				code_point utf8CodePoint = {0};
-				for (s32 i = bytesWritten - 1, j = 0; i >= 0; i--, j++) {
+				for (i32 i = bytesWritten - 1, j = 0; i >= 0; i--, j++) {
 					utf8CodePoint.bytes[j] = utf8Buffer[i];
 				}
 
@@ -390,7 +389,7 @@ LRESULT CALLBACK WindowProc(HWND window, UINT msg, WPARAM wParam, LPARAM lParam)
 
 		case WM_MOUSEWHEEL: {
 			// newInput->wheelDelta = GET_WHEEL_DELTA_WPARAM(wParam) / WHEEL_DELTA;
-			s32 wheelDelta = GET_WHEEL_DELTA_WPARAM(wParam);
+			i32 wheelDelta = GET_WHEEL_DELTA_WPARAM(wParam);
 			if (wheelDelta > 0) {
 				newInput->keys[Key_WheelUp].isDown = true;
 				newInput->keys[Key_WheelDown].isDown = false;

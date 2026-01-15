@@ -11,7 +11,7 @@ enum text_node_type : u8 {
 };
 
 struct text_node {
-	s64 start, length;
+	i64 start, length;
 	text_node_type type;
 };
 
@@ -30,14 +30,14 @@ struct text_tab {
 	Array<text_node> nodes;
 	char* original;
 
-	s64 cursorIndex;
+	i64 cursorIndex;
 	u32 id;
 	encoding_type encoding;
 
 	bool isOpen;
 };
 
-text_tab TextTab(s32 id) {
+text_tab TextTab(i32 id) {
 	text_tab newTab = {0};
 
 	newTab.id = id;
@@ -66,7 +66,7 @@ u64 GetText_utf8(text_tab* textTab, char* buffer) {
 	return 0;
 }
 
-void TextInsertNode(text_tab* textTab, const text_node& newNode, s64 index) {
+void TextInsertNode(text_tab* textTab, const text_node& newNode, i64 index) {
 	if (newNode.length <= 0)
 		return;
 
@@ -78,11 +78,11 @@ void TextInsertNode(text_tab* textTab, const text_node& newNode, s64 index) {
 		return;
 	}
 
-	s64 textLen = 0;
-	for (s64 i = 0; i < textTab->nodes.count; i++) {
+	i64 textLen = 0;
+	for (i64 i = 0; i < textTab->nodes.count; i++) {
 		text_node* curNode = &nodes[i];
-		s64 start = curNode->start;
-		s64 end = curNode->start + curNode->length;
+		i64 start = curNode->start;
+		i64 end = curNode->start + curNode->length;
 		textLen += curNode->length;
 
 		// вставка на дальней границе узла. добавляем узел после текущего
@@ -112,29 +112,29 @@ void TextInsertNode(text_tab* textTab, const text_node& newNode, s64 index) {
 			te_assert(node1.length > 0 && node2.length > 0);
 
 			*curNode = node1;
-			ArrayInsert(textTab->arena, &nodes,  node2, i + 1);
+			ArrayInsert(textTab->arena, &nodes, node2, i + 1);
 			ArrayInsert(textTab->arena, &nodes, newNode, i + 1);
 			break;
 		}
 	}
 }
 
-void TextInsertString(text_tab* tab, String str, s64 index) {
+void TextInsertString(text_tab* tab, String str, i64 index) {
 	text_node newNode = {.start = tab->added.count, .length = str.length, .type = Node_Added};
 	te_assert(newNode.length > 0);
 
 	// TODO: добавить в Array append сразу нескольких элементов
-	for (s64 i = 0; i < str.length; i++) {
+	for (i64 i = 0; i < str.length; i++) {
 		ArrayPush(tab->arena, &tab->added, str.base[i]);
 	}
 
 	TextInsertNode(tab, newNode, index);
 }
 
-void TextInsertChar(text_tab* textTab, code_point utf8CodePoint, s64 pos) {
-	s32 length = GetLength(utf8CodePoint);
+void TextInsertChar(text_tab* textTab, code_point utf8CodePoint, i64 pos) {
+	i32 length = GetLength(utf8CodePoint);
 	decltype(code_point::bytes) bytes = {0};
-	for (s32 i = length - 1, j = 0; i >= 0; i--, j++) {
+	for (i32 i = length - 1, j = 0; i >= 0; i--, j++) {
 		bytes[j] = utf8CodePoint.bytes[i];
 	}
 
@@ -149,16 +149,16 @@ void TextInsertTest(text_tab* textTab) {
 	TextInsertChar(textTab, c, 0);
 }
 
-s64 TextGetLength(text_tab* tab) {
-	s64 len = 0;
-	for (s64 i = 0; i < tab->nodes.count; i++)
+i64 TextGetLength(text_tab* tab) {
+	i64 len = 0;
+	for (i64 i = 0; i < tab->nodes.count; i++)
 		len += tab->nodes[i].length;
 	return len;
 }
 
 // возвращает кол-во записанных символов
 // не выставляет null-terminator
-s64 TextBuild(text_tab* tab, char* buf) {
+i64 TextBuild(text_tab* tab, char* buf) {
 	Array<text_node>& nodes = tab->nodes;
 
 	char* bufSlider = buf;

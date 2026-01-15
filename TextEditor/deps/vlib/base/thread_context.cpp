@@ -2,13 +2,13 @@
 
 thread_local ThreadContext* tl_ThreadContext;
 
-void ThreadContextInit() {
+void ThreadContextInit(i64 arenasCommit, i64 arenasReserve) {
 	if (tl_ThreadContext != NULL) {
 		LogWarning("Thread context already initalized");
 		return;
 	}
 
-	Arena* arena = ArenaAlloc();
+	Arena* arena = ArenaAlloc(arenasCommit, arenasReserve);
 	tl_ThreadContext = ArenaPushStruct(arena, ThreadContext);
 	tl_ThreadContext->arenas[0] = arena;
 	tl_ThreadContext->arenas[1] = ArenaAlloc();
